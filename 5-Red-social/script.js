@@ -27,6 +27,7 @@ function Contenedor(datosAPI) {
   cardsContainer.appendChild(card);
 }
 
+
 // Función para obtener posts de un usuario
 async function obtenerposts(userId) {
   const ApiURL = `https://jsonplaceholder.typicode.com/posts?userId=${userId}`;
