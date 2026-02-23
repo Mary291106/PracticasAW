@@ -18,15 +18,8 @@ function Contenedor(datosAPI) {
       <p><strong>Company:</strong> ${company.name}</p>
   `;  
 
-  card.style.border = '1px solid #ccc';
-  card.style.padding = '10px';
-  card.style.margin = '10px';
-  card.style.borderRadius = '5px';
-  card.style.backgroundColor = '#ffc8dd';
-
   cardsContainer.appendChild(card);
 }
-
 
 // Función para obtener posts de un usuario
 async function obtenerposts(userId) {
@@ -45,6 +38,13 @@ async function obtenerposts(userId) {
         <h4>${post.title}</h4>
         <p>${post.body}</p>
       `;
+
+      // Evento click para mostrar modal con comentarios
+      postDiv.addEventListener("click", () => {
+        mostrarModal(post);
+        obtenerComentarios(post.id);
+      });
+
       cardsContainer.appendChild(postDiv);
     });
 
@@ -53,7 +53,51 @@ async function obtenerposts(userId) {
   }
 }
 
-// Función principal para cargar usuarios y llenar el filtro
+// Función para obtener comentarios
+async function obtenerComentarios(postId) {
+  const ApiURL = `https://jsonplaceholder.typicode.com/comments?postId=${postId}`;
+  try {
+    const response = await fetch(ApiURL);
+    const comments = await response.json();
+    const commentsList = document.getElementById("commentsList");
+    commentsList.innerHTML = ""; // Limpiar comentarios anteriores
+
+    comments.forEach(comment => {
+      const commentItem = document.createElement("li");
+      commentItem.innerHTML = `<strong>${comment.name}:</strong> ${comment.body}`;
+      commentsList.appendChild(commentItem);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Función para mostrar modalllll
+function mostrarModal(post) {
+  const modal = document.getElementById("modal");
+  const postTitle = document.getElementById("postTitle");
+  const postBody = document.getElementById("postBody");
+
+  postTitle.textContent = post.title;
+  postBody.textContent = post.body;
+
+  modal.style.display = "block";
+
+  // Cerrar modal
+  const closeModal = document.getElementById("closeModal");
+  closeModal.onclick = () => {
+    modal.style.display = "none";
+  };
+
+  // Cerrar modal si se hace clic fuera del contenido
+  window.onclick = (event) => {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+}
+
+// Función principal para cargar usuarios y llenar el filtroooo
 async function DatosApi() {
   try {
     const ApiURL = `https://jsonplaceholder.typicode.com/users/`;
@@ -71,10 +115,13 @@ async function DatosApi() {
     // Mostrar tarjetas de usuarios inicialmente
     datosAPI.forEach(user => Contenedor(user));
 
-    // Evento al cambiar el filtro
+    // Mostrar posts al seleccionar usuario
     userFilter.addEventListener("change", (e) => {
       const userId = e.target.value;
-      if (userId) {
+      if (userId=="") {
+        cardsContainer.innerHTML = ""; // Limpiar el contenedor
+        datosAPI.forEach(user => Contenedor(user)); // Volver a cargar los usuarios
+      } else {
         obtenerposts(userId);
       }
     });
